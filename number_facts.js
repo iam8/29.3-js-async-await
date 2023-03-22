@@ -3,44 +3,38 @@
 
 
 let baseUrl = "http://numbersapi.com";
-let favNum = 7;
-
-// Part 1-1
-let favNumPromise = axios.get(`${baseUrl}/${favNum}?json`);
-
-favNumPromise
-    .then((data) => {
-        $("#fav-num-fact").text(data.data.text);
-    })
-    .catch((error) => console.log(error));
 
 
-// Part 1-2
-let manyNumsPromise = axios.get(`${baseUrl}/0..10`);
-
-manyNumsPromise
-    .then((data) => {
-        for (let num in data.data) {
-            let $factLi = $(`<li>${data.data[num]}</li>`);
-            $("#multiple-req-list").append($factLi);
-        }
-    })
-    .catch((error) => console.log(error));
+async function getNumTrivia(number) {
+    const data = await axios.get(`${baseUrl}/${number}?json`);
+    return data;
+};
 
 
-// Part 1-3
-let favNumManyPromise = axios.get(`${baseUrl}/${favNum}?json`);
+async function getManyNumsTrivia(min, max) {
+    const data = await axios.get(`${baseUrl}/${min}..${max}`);
+    return data;
+};
 
-let appendFact = (data) => {
-    let $factLi = $(`<li>${data.data.text}</li>`);
-    $("#fav-num-facts-list").append($factLi);
 
-    return axios.get(`${baseUrl}/${favNum}?json`);
-}
+$(async function () {
 
-favNumManyPromise
-    .then(appendFact)
-    .then(appendFact)
-    .then(appendFact)
-    .then(appendFact)
-    .catch((error) => console.log(error));
+    // Part 1-1
+    const favNumTrivia = await getNumTrivia(7);
+    $("#fav-num-fact").text(favNumTrivia.data.text);
+
+    // Part 1-2
+    const manyNumsTrivia = await getManyNumsTrivia(5, 20);
+
+    for (let num in manyNumsTrivia.data) {
+        let $factLi = $(`<li>${manyNumsTrivia.data[num]}</li>`);
+        $("#multiple-req-list").append($factLi);
+    };
+
+    // Part 1-3
+    for (let i = 0; i < 4; i++) {
+        let numTrivia = await getNumTrivia(7);
+        let $factLi = $(`<li>${numTrivia.data.text}</li>`);
+        $("#fav-num-facts-list").append($factLi);
+    };
+});
